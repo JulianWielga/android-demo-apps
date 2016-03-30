@@ -161,10 +161,11 @@ public class MainActivity extends Activity {
 
         mCreateDevice.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                String d = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(System.currentTimeMillis()));
+                String date = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(System.currentTimeMillis()));
+                final CreateDevice device = new CreateDevice("Dummy device " + date, mUser.getId());
 
-                RelayrSdk.getRelayrApi()
-                        .createDevice(new CreateDevice("Dummy device " + d, mUser.getId()))
+                RelayrSdk.getDeviceApi()
+                        .createDevice(device)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Device>() {
                             @Override public void onCompleted() {}
@@ -191,23 +192,27 @@ public class MainActivity extends Activity {
 
         mSendData.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                final int nextRand = new Random().nextInt(1000);
-                RelayrSdk.getWebSocketClient()
-                        .publish(mPublishDevice.getId(), new Reading(0, 0, "test", "/", nextRand))
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Void>() {
-                            @Override public void onCompleted() {}
-
-                            @Override public void onError(Throwable e) {
-                                e.printStackTrace();
-                            }
-
-                            @Override public void onNext(Void aVoid) {
-                                mDataSentTV.setText("Number " + nextRand + " sent!");
-                            }
-                        });
+                final int random = new Random().nextInt(1000);
+                publishRandomNumber(random);
             }
         });
+    }
+
+    private void publishRandomNumber(final int random) {
+        RelayrSdk.getWebSocketClient()
+                .publish(mPublishDevice.getId(), new Reading(0, 0, "test", "/", random))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Void>() {
+                    @Override public void onCompleted() {}
+
+                    @Override public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override public void onNext(Void aVoid) {
+                        mDataSentTV.setText("Number " + random + " sent!");
+                    }
+                });
     }
 
     private void showToast(int stringId) {
