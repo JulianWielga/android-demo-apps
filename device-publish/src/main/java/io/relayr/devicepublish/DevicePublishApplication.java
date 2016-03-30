@@ -9,6 +9,6 @@ public class DevicePublishApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        new RelayrSdk.Builder(this).inMockMode(false).build();
+        new RelayrSdk.Builder(this).inMockMode(false).cacheModels(true).build();
     }
 }
